@@ -2,7 +2,7 @@
 ## Concepts
     Stacks
 
-## Description
+## Problem Description
 In this problem you will implement a feature for a text editor to find errors in the usage of brackets in the code.
 
 Your friend is making a text editor for programmers. He is currently working on a feature that will
@@ -21,6 +21,19 @@ Apart from the brackets, code can contain big and small latin letters, digits an
 More formally, all brackets in the code should be divided into pairs of matching brackets, such that in
 each pair the opening bracket goes before the closing bracket, and for any two pairs of brackets either
 one of them is nested inside another one.
+
+## Summary
+
+- Only inform user if there is an error in the usage of brackets.
+    - Also point to the exact place in the code with the problematic bracket.
+
+1. Find first unmatched closing bracket, either by not having a opening matching bracket
+   before it or closes the wrong bracket.
+
+2. If **1** doesnt occur, show/find the first unmatched opening bracket that does not
+   contain a closing bracket.
+
+3. If both **1** and **2** don't occur, inform the user of "Success".
 
 ### Input Format.
 String S containing letters and brackets like ()[]{}.

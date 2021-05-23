@@ -5,7 +5,10 @@
 struct Bracket {
   Bracket(char type, int position) : type(type), position(position) {}
 
-  // Matches char 'c' to a bracket type and the attribute type to a complementing one
+  char type;
+  int position;
+
+  // Checks for matching char bracket with the struct's attribute 'type'.
   bool Matchc(char c) {
     if (type == '[' && c == ']')
       return true;
@@ -16,48 +19,50 @@ struct Bracket {
     return false;
   }
 
-  char type;
-  int position;
 };
 
 int main() {
   std::string text;
   getline(std::cin, text);
 
-  // Template Class for stack
-  std::stack<Bracket> opening_brackets_stack;
+  // Bracket Stack
+  std::stack <Bracket> b_stack;
 
+  // loop through captured string
   for (int position = 0; position < text.length(); ++position) {
     char cur = text[position];
 
-    // Push opening brackets
+    // if opening bracket
     if (cur == '(' || cur == '[' || cur == '{') {
       Bracket open_brack = Bracket(cur, position);
-      opening_brackets_stack.push(open_brack);
+      b_stack.push(open_brack);
+
     } else {
-      // In case of first closing bracket
-      if (opening_brackets_stack.empty()) {
-        std::cout << position + 1 << std::endl;
-        return -1;
+      // if closing bracket
+      if (cur == ')' || cur == ']' || cur == '}') {
+        if (b_stack.empty()) {
+          // unmatched closing bracket with no opening bracket on the stack
+          std::cout << position + 1 << std::endl;
+          return -1;
+        } else {
+          Bracket top = b_stack.top(); // returns top element of stack
+          // if current closing bracket DOESNT match to latest opening bracket
+          if (!top.Matchc(cur)) {
+            // most recent opening bracket does not match this closing bracket
+            std::cout << position + 1 << std::endl;
+            return -1;
+          } else {
+            b_stack.pop();
+          }
+        }
       }
-
-      Bracket top = opening_brackets_stack.top();
-
-      if ((cur == ')' 
-            && !top.Matchc(cur)) 
-            || (cur == ']' && !top.Matchc(cur)) 
-            || (cur == '}' && !top.Matchc(cur))) {
-
-        std::cout << position + 1 << std::endl;
-        return -1;
-      }
-      opening_brackets_stack.pop();
     }
   }
 
-  if (!opening_brackets_stack.empty()) {
+  if (!b_stack.empty()) {
     // In case open brackets werent matched to the end
-    std::cout << text.length() << std::endl;
+    Bracket top = b_stack.top(); // returns top element of stack
+    std::cout << top.position + 1 << std::endl;
     return -1;
   } else {
     std::cout << "Success" << std::endl;
