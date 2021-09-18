@@ -49,7 +49,7 @@ void populateLeaves(std::vector<int> *leaves) {
 }
 
 int findLeafDepth(Node *leaf, std::vector<int> *paths) {
-  int diff;
+  int diff = 0,inc = 0;
   int height = 1;
   std::stack<int> st;
   for (Node* it=leaf->parent; it!=NULL; it=it->parent) {
@@ -59,19 +59,18 @@ int findLeafDepth(Node *leaf, std::vector<int> *paths) {
       return height;
     } else {
       ++height;
-      if (it->parent != NULL) {
+      if (it->key != root_key) {
         paths->at(it->key) = height;
         st.push(it->key);
       }
     }
   }
 
-  int inc = 1;
   while (!st.empty()) {
    int val = st.top() ;
    st.pop();
    ++inc;
-   paths->at(val) = inc;
+   paths->at(val) = inc + 1;
   }
   return height;
 }

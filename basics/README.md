@@ -417,22 +417,3 @@ def LevelTraversal(Tree):
             q.Enqueue(node.right)
 
 ```
-
-```python
-def LevelTraversal(Tree):
-# Prefers left children.
-# Goes on a level like basis, which
-# is expected due to the Queue approach.
-    if tree = nil:
-        return
-    Queue q;
-    q,Enqueue(tree)
-    while not q.Empty():
-        node <- q.Dequeue()
-        print(node)
-        if node.left != nil:
-            q.Enqueue(node.left)
-        if node.right != nil:
-            q.Enqueue(node.right)
-
-```
