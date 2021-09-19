@@ -1,0 +1,4 @@
+# CMAKE
+build/*
+bin/*
+
