@@ -18,6 +18,13 @@ file (GLOB SOURCES src/*.cc)
 # compiles the files defined by SOURCES to generate the executable.
 add_executable(${BIN} ${SOURCES})
 
+set_property (DIRECTORY PROPERTY ADDITIONAL_CLEAN_FILES
+    "${PROJECT_SOURCE_DIR}/build/CMakeFiles"
+    "${PROJECT_SOURCE_DIR}/build/cmake_install.cmake"
+    "${PROJECT_SOURCE_DIR}/build/CMakeCache.txt"
+    "${PROJECT_SOURCE_DIR}/build/compile_commands.json"
+    "${PROJECT_SOURCE_DIR}/build/Makefile"
+    )
 add_custom_target(
     "debug"
     DEPENDS ${BIN}
