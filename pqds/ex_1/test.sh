@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -f tests ]; then
+if [ -d tests ]; then
   for f in $(ls tests); do
     if [[ "${#f}" -eq 2 ]]; then
       if [ -e bin/bin ]; then
