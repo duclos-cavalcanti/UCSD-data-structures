@@ -407,7 +407,7 @@ def LevelTraversal(Tree):
     if tree = nil:
         return
     Queue q;
-    q,Enqueue(tree)
+    q.Enqueue(tree)
     while not q.Empty():
         node <- q.Dequeue()
         print(node)
