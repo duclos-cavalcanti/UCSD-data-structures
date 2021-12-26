@@ -2,3 +2,6 @@
 build/*
 bin/*
 
+.cache/
+.cache/*
+
