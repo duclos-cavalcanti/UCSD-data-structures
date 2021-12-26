@@ -32,3 +32,10 @@ add_custom_target(
     COMMAND gdb ${BIN} -tui
     )
 
+add_custom_target(
+    "test"
+    DEPENDS ${BIN}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ./test.sh
+    )
+
