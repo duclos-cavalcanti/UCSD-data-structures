@@ -19,6 +19,9 @@ if [ -f tests ]; then
           echo "CORRECT"
           cat tests/${f}.a
         fi
+      else
+        echo "Binary wasnt built."
+        echo "Aborting tests!"
       fi
     fi
   done
