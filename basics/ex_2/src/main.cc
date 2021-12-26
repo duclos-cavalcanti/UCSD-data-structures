@@ -1,118 +1,99 @@
-#include <iostream>
-#include <stack>
-#include <string>
-
 #include <algorithm>
 #include <iostream>
 #include <vector>
 #include <queue>
-
 #if defined(__unix__) || defined(__APPLE__)
 #include <sys/resource.h>
 #endif
 
 class Node;
 
-int root_key = 0;
-std::vector<int> leaves;
-
 class Node {
 public:
-    int key;
-    int depth;
-    Node *parent;
-    std::vector<Node *> children;
+  int key;
+  Node *parent;
+  std::vector<Node *> children;
 
-    Node() {
-      this->parent = NULL;
-      this->children.resize(0);
-    }
+  Node() {
+    this->parent = NULL;
+  }
 
-    void setParent(Node *theParent) {
-      parent = theParent;
-      parent->children.push_back(this);
-    }
+  void setParent(Node *theParent) {
+    parent = theParent;
+    parent->children.push_back(this);
+  }
 };
 
-void shaveLeaf(int target) {
-  for (int i = 0; i < leaves.size(); i++) {
-   if (leaves.at(i) == target)
-     leaves.erase(leaves.begin() + i);
-  }
-}
 
-void populateLeaves(std::vector<int> *leaves) {
-  int size = leaves->size();
-  for (int i = 0; i < size; i++) {
-    leaves->at(i) = i;
-  }
-}
+std::queue<Node> q;
+Node* root;
 
-int findLeafDepth(Node *leaf, std::vector<int> *paths) {
-  int diff = 0,inc = 0;
-  int height = 1;
-  std::stack<int> st;
-  for (Node* it=leaf->parent; it!=NULL; it=it->parent) {
-    diff = paths->at(it->key);
-    if (diff > 0) {
-      height += diff;
-      return height;
-    } else {
-      ++height;
-      if (it->key != root_key) {
-        paths->at(it->key) = height;
-        st.push(it->key);
-      }
-    }
-  }
-
-  while (!st.empty()) {
-   int val = st.top() ;
-   st.pop();
-   ++inc;
-   paths->at(val) = inc + 1;
-  }
-  return height;
-}
-
-int recreateTree(std::vector<Node>& nodes) {
-  int n;
-  std::ios_base::sync_with_stdio(0);
-  std::cin >> n; // number of nodes in tree
-
-  nodes.resize(n);
-  leaves.resize(n);
-  populateLeaves(&leaves);
-  for (int child_index = 0; child_index < n; child_index++) {
+std::vector<Node> createTree(int size) {
+  std::vector<Node> nodes;
+  nodes.resize(size);
+  for (int child_index = 0; child_index < size; child_index++) {
     int parent_index;
     std::cin >> parent_index;
-    if (parent_index >= 0) {
+    if (parent_index >= 0)
       nodes[child_index].setParent(&nodes[parent_index]);
-      if (parent_index < leaves.size())
-        shaveLeaf(parent_index);
-    } else {
-      root_key = child_index;
-      shaveLeaf(child_index);
-    }
+    else
+      root = &nodes[child_index];
+
+
     nodes[child_index].key = child_index;
   }
 
-  return n;
+  return nodes;
+
 }
 
-int findTreeHeight() {
-  int height, maxHeight = 0;
-  std::vector<int> parents;
-  std::vector<Node> nodes;
+bool hasKeyBeenMapped(std::vector<int>& heightsMap, int key) {
+  return (heightsMap.at(key) > 0);
+}
 
-  int n = recreateTree(nodes);
+int computeTreeHeight(std::vector<Node>& nodes) {
+  int maxHeight = 0;
+  int height = 0;
+  std::vector<int> heightsMap(0);
+  std::vector<int> heights(0);
+  heightsMap.resize(nodes.size());
 
-  std::vector<int> paths(n, -1);
-  for (int it=0; it<leaves.size(); ++it) {
-    height = findLeafDepth(&nodes.at(leaves.at(it)), &paths);
-    maxHeight = std::max(maxHeight, height);
+  if (root == NULL)
+    return 0;
+
+  q.push(*root);
+  heightsMap.at(root->key) = 1;
+
+  while(!q.empty()) {
+    Node n = q.front();
+    q.pop();
+
+    if (!hasKeyBeenMapped(heightsMap, n.key)) {
+      heightsMap.at(n.key) = 1 + heightsMap.at(n.parent->key);
+    }
+
+    if (n.children.size() > 0) { // not leaf node
+      for (int child_index = 0; child_index < n.children.size(); child_index++ ) {
+        q.push(*n.children.at(child_index));
+      }
+    } else { // leaf node
+      heights.push_back(heightsMap.at(n.key));
+    }
+
   }
 
+  maxHeight = *std::max_element(heights.begin(), heights.end());
+  return maxHeight;
+}
+
+int main_with_large_stack_space() {
+  std::ios_base::sync_with_stdio(0);
+  int n;
+  std::cin >> n;
+  std::vector<Node> nodes = createTree(n);
+
+  int maxHeight = computeTreeHeight(nodes);
+    
   std::cout << maxHeight << std::endl;
   return 0;
 }
@@ -126,17 +107,19 @@ int main (int argc, char **argv)
   int result;
 
   result = getrlimit(RLIMIT_STACK, &rl);
-  if (result == 0) {
-      if (rl.rlim_cur < kStackSize) {
+  if (result == 0)
+  {
+      if (rl.rlim_cur < kStackSize)
+      {
           rl.rlim_cur = kStackSize;
           result = setrlimit(RLIMIT_STACK, &rl);
-          if (result != 0) {
+          if (result != 0)
+          {
               std::cerr << "setrlimit returned result = " << result << std::endl;
           }
       }
   }
 
 #endif
-  return findTreeHeight();
+  return main_with_large_stack_space();
 }
-
