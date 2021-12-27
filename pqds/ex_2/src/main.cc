@@ -66,7 +66,8 @@ class JobQueue {
 
   void siftUp(int i) {
     // i starts as child node
-    while (i > 0 && canJobSift(i, getParent(i))) {
+    while (i > 0 && 
+           canJobSift(i, getParent(i))) {
       swap(working_jobs_[getParent(i)], working_jobs_[i]);
       i = getParent(i);
     }
@@ -75,14 +76,16 @@ class JobQueue {
   void siftDown(int i) {
     // i starts as parent node
     int minIndex = i;
-
     long unsigned int left = getLeftChild(i);
-    if (left < working_jobs_.size() && canJobSift(left, minIndex)) {
+    long unsigned int right = getRightChild(i);
+
+    if (left < working_jobs_.size() && 
+        canJobSift(left, minIndex)) {
       minIndex = left;
     }
 
-    long unsigned int right = getRightChild(i);
-    if (right < working_jobs_.size() && canJobSift(right, minIndex)) {
+    if (right < working_jobs_.size() && 
+        canJobSift(right, minIndex)) {
       minIndex = right;
     }
 
@@ -100,7 +103,7 @@ class JobQueue {
     return j;
   }
 
-  void insertJob(Job j) {
+  void insertJob(Job* j) {
     // don't understand why from the 100 000 cases, these 3 ONLY are wrong
     /* if (j.thread_id_ == 3278 && j.start_time_ == 4315927421) */
     /*   j.thread_id_ = 2997; */
@@ -109,8 +112,8 @@ class JobQueue {
     /* else if (j.thread_id_ == 3278 && j.start_time_ == 4553881072) */
     /*   j.thread_id_ = 2997; */
 
-    reports_.push_back(std::make_pair(j.thread_id_, j.start_time_));
-    working_jobs_.push_back(j);
+    reports_.push_back(std::make_pair(j->thread_id_, j->start_time_));
+    working_jobs_.push_back(*j);
     siftUp(working_jobs_.size() - 1);
   }
 
@@ -122,33 +125,29 @@ class JobQueue {
     }
   }
 
-
-  void popJob() {
+  void vacateJob() {
     Job j = extractMin();
     time_ = j.finish_time_;
     t_ = j.thread_id_;
   }
 
-
-  void pushJob(Job j) {
-    if (working_jobs_.size() >= num_workers_) {
-      popJob();
-    }
-
-    j.finish_time_ = time_ + j.duration_;
-    j.start_time_ = time_;
-    j.thread_id_ = t_;
-    insertJob(j);
-    t_++;
-  }
-
   void processJobs() {
     for (long long i = 0; i < (long long)jobs_.size(); ++i) {
-      pushJob(jobs_[i]);
-    }
+      if (working_jobs_.size() >= num_workers_) {
+        vacateJob();
+      }
+
+      jobs_[i].finish_time_ = time_ + jobs_[i].duration_;
+      jobs_[i].start_time_ = time_;
+      jobs_[i].thread_id_ = t_;
+      insertJob(&jobs_[i]);
+
+      if (working_jobs_.size() < num_workers_)
+        t_++;
+      }
 
     while (!working_jobs_.empty()) {
-      popJob();
+      vacateJob();
     }
   }
 
@@ -162,7 +161,7 @@ class JobQueue {
 
       for(int i = 0; i < num_jobs; ++i) {
         cin >> job_duration;
-        jobs_.push_back(Job(i, num_jobs - i - 1, job_duration)); // smaller indexes -> larger priority
+        jobs_.push_back(Job(i, num_jobs - i, job_duration)); // smaller indexes -> larger priority
       }
     }
 
