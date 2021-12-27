@@ -81,7 +81,7 @@ class Heap {
     sortHeap();
   }
 
-  void dumpSwaps() const {
+  void write() const {
     cout << swaps_.size() << "\n";
     for (int i = 0; i < swaps_.size(); ++i) {
       cout << swaps_[i].first << " " << swaps_[i].second << "\n";
@@ -94,6 +94,6 @@ int main() {
   std::ios_base::sync_with_stdio(false);
   Heap min_heap;
   min_heap.build();
-  min_heap.dumpSwaps();
+  min_heap.write();
   return 0;
 }
