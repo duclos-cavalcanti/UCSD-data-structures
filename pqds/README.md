@@ -303,7 +303,7 @@ def Find(i):
 - Tree with Path Compression Implementation
 ```python
 def Find(i):
-    while i != parent[i]:
+    if i != parent[i]:
         i <- Find(parent[i])
     return parent[i]
     # Running Time: O(tree height) = O(log*n)
