@@ -38,8 +38,10 @@ and elements come out in order by priority. Supports the following operations:
 4. **Invariant**: heap property is violated on at most one edge
 5. A binary tree is **complete** if all its levels are filled except possibly the last
    one, which is filled from left to right.
-    - First Advantage: A complete binary tree with **n** nodes has height at most **O(logn)**.
-    - Second advantage: Store as an array.
+    - First Advantage: 
+        - Lemma: A complete binary tree with **n** nodes has height at most **O(logn)**.
+    - Second advantage
+        - Stored as an array.
     - Cost: Keep Binary Tree complete.
         - Insert(): insert an element as a leaf in the leftmost vacant position in the last
             level and let it sift up.
@@ -206,3 +208,156 @@ problem naively.
 3. The running time of SiftUp is O(logn base d)
 3. The running time of SiftDown is O(dlogn base d): on each level, we find the largest
    value among d children.
+
+# 2. Disjoint Sets
+## Definition
+Supports the following operations:
+- MakeSet(x)
+    - creates a singleton set {x}
+- Find(x)
+    - returns ID of the set containing x
+    - if x and y lie in the same set, then Find(x) = Find(y)
+    - otherwise Find(x) != Find(y)
+- Union(x,y)
+    - merges two sets containing x and y
+
+## Implementation
+- Naive Implementations:
+    - Array
+        - Use the smallest element of a set as its ID
+        - objects are integers
+        - use the array smallest[1...n]:
+            - smallest[i] stores the smallest element that the set i belongs to
+        - Current bottleneck is the `Union(i, j)` method
+        - What basic DS allows for efficient merging? 
+            - Answer: Linked Lists
+
+    - Linked List
+        - Pros:
+            - Running time of Union is O(1)
+            - Well-defined ID
+        - Cons:
+            - Running time of Find is O(n) as we need to traverse the entire list to find
+                its tail
+            - Union(x, y) works in time O(1) **only** if we can get the tail of the list x and
+                head of the list y in constant time!
+        - This brings us eventually to the conclusion that tree's are better DS for this
+            implementation than linked lists are, since LL grow longer and longer and add
+            complexity to the runtime.
+
+- Used Implementations:
+    - Trees
+        1. With Union by Rank Heuristic:
+            - When merging two trees together, the goal is to hang the shorter one under the root
+              of the taller one. This way we keep the running time lower. To quickly find the height
+              a tree, we will keep the height of each subtree in an array rank[1..n]: rank[i] is the 
+              height of the subtree whose roots is i. 
+            - Hanging a shorter tree under a taller one is called a union by rank heuristic!
+            - Important Property: 
+                - for any node i, ranke[i] is equal to the height of the tree rooted at i
+            - Lemma: the height of any tree in the forest is at most log(n) with base 2!
+            - Follows from the following:
+                - Lemma: Any tree of height k in the forest has at least 2^k nodes.
+        2. With Path Compression Heuristic:
+            - Restructures tree as a heuristic that keeps the tree height even smaller. All
+                nodes are directly connected to roots, except the leaves.
+            - The iterated logarithm of n, log*n, is the number of times the logarithm
+                function needs to be applied to n before the result is less or equal than 1.
+                For any practical value of the log star function, its result will be at most
+                5.
+            - Result:
+                - Lemma: Assume that initially the data structure is empty. We make sequence
+                    of m operations including n calls to MakeSet. Then the total running time
+                    is O(mlog*n). Then the amortizewd time of a single operation is O(log*n). 
+                    Even though the log start function is not bounded, for all practical values we can 
+                    evaluate, log start of n is at most 5. Constant time!
+
+## Snippets
+- Array Implementation
+```python
+def MakeSet(i):
+    smallest[i] <- i
+```
+- Tree Implementation
+```python
+def MakeSet(i):
+    parent[i] <- i
+    rank[i] <- 0
+    # Running Time: O(1)
+```
+
+- Array Implementation
+```python
+def Find(i):
+    return smallest[i]
+```
+- Tree Implementation
+```python
+def Find(i):
+    while i != parent[i]:
+        i <- parent[i]
+    return i
+    # Running Time: O(tree height) = O(logn)
+```
+
+- Tree with Path Compression Implementation
+```python
+def Find(i):
+    while i != parent[i]:
+        i <- Find(parent[i])
+    return parent[i]
+    # Running Time: O(tree height) = O(log*n)
+```
+
+- Array Implementation
+```python
+def Union(i, j):
+    i_id <- Find(i)
+    j_id <- Find(j)
+    if i_id == j_id:
+        return
+    
+    m <- min(i_id, j_id)
+    for k from 1 to n:
+        if smallest[k] in {i_id, j_id}:
+            smallest[k] <- m
+    # Running time O(n)
+    # Here is the largest bottleneck
+```
+
+- Tree Implementation
+```python
+def Union(i, j):
+    i_id <- Find(i)
+    j_id <- Find(j)
+    if i_id == j_id:
+        return
+    
+    if rank[i_id] > rank[j_id]:
+        parent[j_id] <- i_id
+    else:
+        parent[i_id] <- j_id
+        if rank[i_id] = rank[j_id]:
+            rank[j_id] <- rank[j_id] + 1
+    # Running Time: O(tree height) = O(logn)
+```
+
+```python
+def Preprocess(maze):
+    for each cell c in maze:
+        MakeSet(c)
+
+    for each cell c in maze:
+        for each neighbor n of c:
+            Union(c, n)
+```
+
+```python
+def isReachable(A, B):
+    return Find(A) == Find(B)
+```
+
+```python
+def isReachable(A, B):
+    return Find(A) == Find(B)
+```
