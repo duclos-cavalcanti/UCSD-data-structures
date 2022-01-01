@@ -169,6 +169,36 @@ String Hashing.
 - Choose big prime number p
 - Use Polynomial Hashing
 
+Example Application 3:
+Searching for Substrings:
+- Given a text T and a string P, find all occurrences of P in T
+- Can be used to find genes within genome
+- Rabin Karp's Algorithm
+    - if h(P) != h(S), then definitely P != S
+    - if h(P) == h(S), call AreEqual(P, S)
+    - uses polynomial hash family Pp with prime p
+    - the probability Pr[h(P) = h(S)] of collision is at most |P|/p, which can be made small by choosing very large prime p.
+    - we may have false alarms! Same hashes but different strings. Probability of false alarms = `(|T| - |P| + 1)*P/p`, which can be made small by selecting `p >> |T||P|`
+    - Running Time without AreEqual: O(|T||P|), Still??
+    - AreEqual itself is O(|P|)
+    - Optimization:
+        - Using properties of the Polynomial Hashing, the `Recurrence Equation` can be deduced
+        - Therefore x^|P| can be computed and saved
+        - Given this new equation, H[i] can be computed in O(1) given H[i + 1] and x^|P|
+        - Using Precomputation and the Recurrence Equation, Rabin Karps Algorithm can be greatly improved. The idea is that we use the recurrence equation to precompute all hashes of substrings T of length equal to of P.
+        - Then proceed the same way as the original
+        - Precomputation:
+            - PolyHash is called once: O(|P|)
+            - x^|P| is computed in O(|P|)
+            - All values of H are computed in O(|T| - |P|)
+            - Total precomputation time: O(|T| + |P|)
+        - Now final Optimized Rabin Karp:
+            - h(P) is computed O(|P|)
+            - PrecomputeHashes in O(|T| + |P|)
+            - Total time spent in AreEqual is O(q|P|) on average (for large enough p), where q is the number of occurrences of P in T.
+            - Total running time on average: O(|T| + (q + 1)|P|), much faster than O(|T||P|)!!
+            - Usually q is small!!
+
 ## API Complexity
 | API (Array)                | Complexity    |
 | :-------------             | :----------:  |
@@ -283,4 +313,73 @@ def PolyHash(S, p, x)):
     for i from |S| - 1 downto 0:
         hash <- (hash * x + S[i]) mod p
     return hash
+```
+
+- Substring searching
+```python
+def AreEqual(S1, S2)):
+    if |S1| != |S2|:
+        return False
+    for i from 0 to |S1| - 1:
+        if S1[i] != S2[i]:
+            return False
+    return True
+```
+
+```python
+def FindSubstringNaive(T, P)):
+    positions <- empty list
+    for i from |T| - |P|:
+        if AreEqual(T[i..i + |P| -1], P):
+            positions.Append(i)
+    return positions
+    # O(|T|*|P|)
+```
+
+```python
+def RabinKarp(T, P)):
+    p <- big_prime
+    x <- random(1, p -1)
+    positions <- empty list
+    pHash <- PolyHash(P, p, x)
+
+    for i from 0 to |T| - |P|:
+        tHash <- PolyHash(T[i..i + |P| -1], p, x)
+        if pHash != tHash
+            continue
+
+        if AreEqual(T[i..i +  |P| - 1], P)
+            positions.Append(i)
+    return positions
+```
+
+```python
+def PrecomputeHashes(T, |P|, p, x):
+    H <- array of length |T| - |P| + 1
+    S <- T[|T| - |P|..|T| - 1]
+    H[|T| - |P|] < PolyHash(S, p ,x)
+    y <- 1
+    for i from 1 to |P|:
+        y <- (y*x) mod p
+    for i from |T| - |P| - 1 downto 0:
+        H[i] <- (xH[i + 1] + T[i] - yT[i + |P|])mod p 
+    return H
+    # O(|P| + |P| + |T| - |P|) = O(|T| + |P|), much faster!
+```
+```python
+def RabinKarpFinal(T, P)):
+    p <- big_prime
+    x <- random(1, p -1)
+    positions <- empty list
+    pHash <- PolyHash(P, p, x)
+    H <- PrecomputeHashes(T, |P|, p , x)
+
+    for i from 0 to |T| - |P|:
+        if pHash != H[i]
+            continue
+
+        if AreEqual(T[i..i +  |P| - 1], P)
+            positions.Append(i)
+    return positions
+    # O(|T| + (q + 1)|P|)
 ```
