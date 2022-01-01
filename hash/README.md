@@ -357,7 +357,7 @@ def RabinKarp(T, P)):
 def PrecomputeHashes(T, |P|, p, x):
     H <- array of length |T| - |P| + 1
     S <- T[|T| - |P|..|T| - 1]
-    H[|T| - |P|] < PolyHash(S, p ,x)
+    H[|T| - |P|] <- PolyHash(S, p ,x)
     y <- 1
     for i from 1 to |P|:
         y <- (y*x) mod p
