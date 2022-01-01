@@ -1,0 +1,8 @@
+# CMAKE
+build/*
+bin/*
+
+.cache/
+.cache/*
+
+log.txt
